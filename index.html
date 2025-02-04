@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Analysis Chatbot</title>
+    <style>
+        body {
+            background: #f4f6f9;
+            font-family: 'Helvetica Neue', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+            flex-direction: column;
+        }
+
+        .chat-container {
+            width: 600px;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            max-height: 80%;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            font-size: 30px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .welcome-message {
+            font-size: 20px;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .chat-box {
+            height: 350px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            background: #ecf0f1;
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.6;
+            transition: background-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-box .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .chat-box .user {
+            background-color: #3498db;
+            color: white;
+            align-self: flex-start;
+            margin-left: 10px;
+        }
+
+        .chat-box .bot {
+            background-color: #f39c12;
+            color: white;
+            align-self: flex-end;
+            margin-right: 10px;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #555;
+            background-color: #fafafa;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-input input:focus {
+            outline: none;
+            border-color: #3498db;
+            background-color: white;
+        }
+
+        .chat-input button {
+            padding: 12px 20px;
+            border: none;
+            background: #3498db;
+            color: white;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .chat-input button:hover {
+            background: #2980b9;
+        }
+
+        .neutral {
+            background-color: #ecf0f1; /* Light Gray */
+        }
+
+        .positive {
+            background-color: #f1c40f; /* Yellow */
+        }
+
+        .negative {
+            background-color: #e74c3c; /* Red */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">Sentiment Analysis Chatbot</div>
+        <div class="welcome-message">How's life today? Feel free to share your thoughts, and I'll analyze your sentiment!</div>
+        <div class="chat-box" id="chat-box"></div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type a message..." autocomplete="off">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("user-input").addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    sendMessage();
+                }
+            });
+        });
+
+        function sendMessage() {
+            let userInput = document.getElementById("user-input").value;
+            if (userInput.trim() === "") return;
+
+            addMessage(userInput, "user");
+            document.getElementById("user-input").value = "";
+
+            // Set default neutral background initially
+            setChatBoxColor("neutral");
+
+            fetch("http://127.0.0.1:5000/get_sentiment", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const sentiment = data.sentiment.toLowerCase();
+                addMessage(`Sentiment: ${data.sentiment}`, "bot");
+                
+                // Change background color based on sentiment
+                if (sentiment === "positive") {
+                    setChatBoxColor("positive");
+                } else if (sentiment === "negative") {
+                    setChatBoxColor("negative");
+                } else {
+                    setChatBoxColor("neutral");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                addMessage("Error connecting to server.", "bot");
+                setChatBoxColor("neutral");
+            });
+        }
+
+        function addMessage(text, sender) {
+            let chatBox = document.getElementById("chat-box");
+            let messageDiv = document.createElement("div");
+            messageDiv.classList.add("message", sender);
+            messageDiv.textContent = text;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function setChatBoxColor(color) {
+            let chatBox = document.getElementById("chat-box");
+            chatBox.classList.remove("neutral", "positive", "negative");
+            chatBox.classList.add(color);
+        }
+    </script>
+</body>
+</html>
