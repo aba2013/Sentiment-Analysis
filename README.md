@@ -1,1 +1,3 @@
 # Sentiment-Analysis
+
+The **Sentiment Analysis Chatbot** is an interactive web application designed to analyze and understand the emotional tone of users' messages. By simply typing a message, users can receive an instant analysis of whether their sentiment is **positive**, **negative**, or **neutral**, with corresponding visual feedback in the form of color-coded backgrounds: **yellow** for positive, **red** for negative, and **peach** for neutral. The chatbot offers a welcoming experience, encouraging users to share their thoughts and receive insightful sentiment analysis, making it a practical tool for gauging emotions in text. The design is sleek, formal, and user-friendly, ensuring a smooth and professional experience for all users.
